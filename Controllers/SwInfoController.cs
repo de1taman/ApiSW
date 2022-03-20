@@ -20,7 +20,7 @@ namespace ApiSW.Controllers
         
         [Route("get-movies-by-starship/{id}")]
         [HttpGet]
-        public async Task<ActionResult<List<Movie>>> GetAsync(int id)
+        public async Task<ActionResult<StarshipWithMoviesModel>> GetAsync(int id)
         {
             var result = await _starWarsServiceClient.GetStarshipInfoAsync(id);
             if (result!=null)

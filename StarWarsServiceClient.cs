@@ -25,7 +25,7 @@ namespace ApiSW
             _httpClient = httpClient;
         }
 
-        public async Task<object> GetStarshipInfoAsync(int id)
+        public async Task<StarshipWithMoviesModel> GetStarshipInfoAsync(int id)
         {
             var url = $"starships/{id}";
             var response = await _httpClient.GetAsync(url);
@@ -37,29 +37,26 @@ namespace ApiSW
                 
                 if (deserializedObject.Films.Length!=0)
                 {
-                    List<Movie> movies = new List<Movie>();
+                    List<MovieModel> movies = new List<MovieModel>();
                     foreach (var item in deserializedObject.Films)
                     {
-                        var mov = GetMovieInfoAsync(item);
+                        var mov = GetMovieInfoAsync(item.Replace("https://swapi.dev/api/films/", ""));
                         if (mov.Result != null)
-                        {
                             movies.Add(mov.Result);
-                        }
                     }
-                    return movies;
+                    return new StarshipWithMoviesModel() { StarshipName = deserializedObject.Name, StarshipId = id, Movies = movies };
                 }
             }
-
             return null;
         }
-        private async Task<Movie> GetMovieInfoAsync(string MovieUrl)
+        private async Task<MovieModel> GetMovieInfoAsync(string id)
         {
-            var url = $"films/{MovieUrl.Replace("https://swapi.dev/api/films/", "")}";//фигня какая то
+            var url = $"films/{id}";
             var response = await _httpClient.GetAsync(url);
             if (response.IsSuccessStatusCode)
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
-                var deserializedObject = JsonConvert.DeserializeObject<Movie>(responseBody, jsonSerializerSettings);
+                var deserializedObject = JsonConvert.DeserializeObject<MovieModel>(responseBody, jsonSerializerSettings);
                 return deserializedObject;
             }
             return null;
